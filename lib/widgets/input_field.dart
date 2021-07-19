@@ -6,19 +6,22 @@ class InputField extends StatelessWidget {
       required this.placeholder,
       required this.errorText,
       required this.initialValue,
-      required this.onChanged})
+      required this.onChanged,
+      required this.obscureText})
       : super(key: key);
 
-  String placeholder;
-  String errorText;
-  String initialValue;
-  Function(String) onChanged;
+  String? placeholder;
+  String? errorText;
+  String? initialValue;
+  Function(String?) onChanged;
+  bool obscureText;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: TextFormField(
+        obscureText: obscureText,
         initialValue: initialValue,
         onChanged: onChanged,
         textAlign: TextAlign.center,

@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kanban/bloc/auth_bloc.dart';
+import 'package:kanban/bloc/auth_events.dart';
+import 'package:kanban/bloc/auth_state.dart';
+import 'package:kanban/bloc/card_bloc.dart';
+import 'package:kanban/bloc/card_events.dart';
+import 'package:kanban/bloc/card_state.dart';
+import 'package:kanban/services/card_api_provider.dart';
+import 'package:kanban/widgets/info_card.dart';
 
 class TrellesPage extends StatelessWidget {
   const TrellesPage({Key? key}) : super(key: key);
@@ -11,25 +20,31 @@ class TrellesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CardProvider cardProvider = CardProvider();
+
     return DefaultTabController(
       length: tabs.length,
       child: Scaffold(
-        backgroundColor: Colors.black,
         appBar: AppBar(
-          backgroundColor: Colors.grey[850],
           actions: [
-            RawMaterialButton(
-              onPressed: () {},
-              elevation: 2.0,
-              fillColor: Colors.cyan,
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 26.0,
-              ),
-              padding: EdgeInsets.all(10.0),
-              shape: CircleBorder(),
-            )
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                return RawMaterialButton(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLogOutEvent());
+                  },
+                  elevation: 2.0,
+                  fillColor: Colors.cyan,
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 26.0,
+                  ),
+                  padding: EdgeInsets.all(8.0),
+                  shape: CircleBorder(),
+                );
+              },
+            ),
           ],
           automaticallyImplyLeading: false,
           bottom: TabBar(
@@ -42,15 +57,28 @@ class TrellesPage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            for (final tab in tabs)
-              ListTile(
-                title: Text(
-                  "id: 213",
-                  style: TextStyle(color: Colors.white),
-                ),
-                subtitle: Text(
-                  tab,
-                  style: TextStyle(color: Colors.white),
+            for (int i = 0; i < tabs.length; i++)
+              BlocProvider<CardBloc>(
+                create: (context) => CardBloc(cardProvider: cardProvider),
+                child: BlocBuilder<CardBloc, CardState>(
+                  builder: (context, cardState) {
+                    if (cardState is CardInitState) {
+                      context.read<CardBloc>().add(CardGetEvent(row: i));
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (cardState is CardLoadedState) {
+                      return ListView.builder(
+                        itemCount: cardState.cards.length,
+                        itemBuilder: (context, index) {
+                          return InfoCard(
+                            id: cardState.cards[index].id,
+                            subtitle: cardState.cards[index].text,
+                          );
+                        },
+                      );
+                    }
+                    return Center(child: CircularProgressIndicator());
+                  },
                 ),
               ),
           ],
