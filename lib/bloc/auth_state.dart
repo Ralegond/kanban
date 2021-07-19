@@ -1,4 +1,4 @@
-import 'package:kanban/models/account.dart';
+import 'package:kanban/models/auth_result.dart';
 
 abstract class AuthState {}
 
@@ -11,8 +11,11 @@ class AuthInitState extends AuthState {
 class AuthLoadingState extends AuthState {}
 
 class AuthSuccessState extends AuthState {
-  Account account;
-  AuthSuccessState({required this.account});
+  AuthResult authResult;
+  AuthSuccessState({required this.authResult});
 }
 
-class AuthErrorState extends AuthState {}
+class AuthErrorState extends AuthState {
+  String error;
+  AuthErrorState({required this.error});
+}

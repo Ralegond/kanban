@@ -10,12 +10,14 @@ class CardProvider {
       Uri.parse(
           'https://trello.backend.tests.nekidaem.ru/api/v1/cards/?row=$row'),
       headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
         HttpHeaders.authorizationHeader: "JWT $token",
       },
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> cardsJson = json.decode(response.body);
+      final List<dynamic> cardsJson =
+          json.decode(utf8.decode(response.bodyBytes));
       return cardsJson.map((json) => CardData.fromJson(json)).toList();
     } else {
       throw Exception('Error get cards');

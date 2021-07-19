@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           }
           if (authState is AuthErrorState) {
             return AuthPage(
-              authError: "Auth error",
+              authError: authState.error,
               usernameError: "",
               passwordError: "",
             );

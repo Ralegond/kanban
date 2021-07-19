@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kanban/bloc/auth_state.dart';
-import 'package:kanban/models/account.dart';
+import 'package:kanban/models/auth_result.dart';
 import 'package:kanban/services/auth_api_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_events.dart';
@@ -27,15 +27,20 @@ class AuthBloc extends Bloc<AuthEvents, AuthState> {
       if (username.length >= 4 && password.length >= 8) {
         try {
           yield AuthLoadingState();
-          final Account _account = await authProvider.logIn(username, password);
+          final AuthResult _authResult =
+              await authProvider.logIn(username, password);
 
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', _account.token);
+          if (_authResult.error == null) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('token', _authResult.token);
 
-          yield AuthSuccessState(account: _account);
+            yield AuthSuccessState(authResult: _authResult);
+          } else {
+            yield AuthErrorState(error: _authResult.error!);
+          }
         } catch (_) {
           print("error");
-          yield AuthErrorState();
+          yield AuthErrorState(error: "try catch error");
         }
       }
     }
